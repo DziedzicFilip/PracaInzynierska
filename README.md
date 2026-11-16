@@ -14,15 +14,6 @@ backend/
 ├── src/
 │   └── Api/
 │       ├── Controllers/
-│       ├── Models/
-│       ├── Views/
-│       ├── Data/
-│       ├── Services/
-│       ├── Repositories/
-│       ├── DTOs/
-│       ├── Middleware/
-│       ├── Configuration/
-│       └── Mapping/
 └── tests/
     ├── Api.UnitTests/
     │   ├── Controllers/

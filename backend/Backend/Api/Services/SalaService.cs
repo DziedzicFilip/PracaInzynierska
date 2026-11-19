@@ -1,4 +1,5 @@
 using Api.Data;
+using Api.Dtos;
 using Api.Models;
 using Api.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -14,36 +15,60 @@ public class SalaService : ISalaService
         _dbContext = dbContext;
     }
 
-    public async Task<IReadOnlyCollection<Sala>> GetAllAsync(
+    public async Task<IReadOnlyCollection<SalaDto>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
         return await _dbContext.Sale
             .AsNoTracking()
             .OrderBy(sala => sala.Id)
+            .Select(sala => new SalaDto
+            {
+                Id = sala.Id,
+                Nazwa = sala.Nazwa,
+                TypSali = sala.TypSali
+            })
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<Sala?> GetByIdAsync(
+    public async Task<SalaDto?> GetByIdAsync(
         int id,
         CancellationToken cancellationToken = default)
     {
         return await _dbContext.Sale
             .AsNoTracking()
+            .Select(sala => new SalaDto
+            {
+                Id = sala.Id,
+                Nazwa = sala.Nazwa,
+                TypSali = sala.TypSali
+            })
             .FirstOrDefaultAsync(sala => sala.Id == id, cancellationToken);
     }
 
-    public async Task<Sala> CreateAsync(
-        Sala sala,
+    public async Task<SalaDto> CreateAsync(
+        SalaDto dto,
         CancellationToken cancellationToken = default)
     {
+        var sala = new Sala
+        {
+            Nazwa = dto.Nazwa,
+            TypSali = dto.TypSali
+        };
+
         _dbContext.Sale.Add(sala);
         await _dbContext.SaveChangesAsync(cancellationToken);
-        return sala;
+
+        return new SalaDto
+        {
+            Id = sala.Id,
+            Nazwa = sala.Nazwa,
+            TypSali = sala.TypSali
+        };
     }
 
     public async Task<bool> UpdateAsync(
         int id,
-        Sala sala,
+        SalaDto dto,
         CancellationToken cancellationToken = default)
     {
         var existingSala = await _dbContext.Sale
@@ -54,8 +79,8 @@ public class SalaService : ISalaService
             return false;
         }
 
-        existingSala.Nazwa = sala.Nazwa;
-        existingSala.TypSali = sala.TypSali;
+        existingSala.Nazwa = dto.Nazwa;
+        existingSala.TypSali = dto.TypSali;
 
         await _dbContext.SaveChangesAsync(cancellationToken);
         return true;

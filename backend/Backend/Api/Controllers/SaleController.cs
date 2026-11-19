@@ -1,4 +1,4 @@
-using Api.Models;
+using Api.Dtos;
 using Api.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,7 +16,7 @@ public class SaleController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyCollection<Sala>>> GetAll(
+    public async Task<ActionResult<IReadOnlyCollection<SalaDto>>> GetAll(
         CancellationToken cancellationToken)
     {
         var sale = await _salaService.GetAllAsync(cancellationToken);
@@ -24,7 +24,7 @@ public class SaleController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<Sala>> GetById(
+    public async Task<ActionResult<SalaDto>> GetById(
         int id,
         CancellationToken cancellationToken)
     {
@@ -33,8 +33,8 @@ public class SaleController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Sala>> Create(
-        Sala sala,
+    public async Task<ActionResult<SalaDto>> Create(
+        SalaDto sala,
         CancellationToken cancellationToken)
     {
         var createdSala = await _salaService.CreateAsync(sala, cancellationToken);
@@ -47,7 +47,7 @@ public class SaleController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(
         int id,
-        Sala sala,
+        SalaDto sala,
         CancellationToken cancellationToken)
     {
         var updated = await _salaService.UpdateAsync(id, sala, cancellationToken);

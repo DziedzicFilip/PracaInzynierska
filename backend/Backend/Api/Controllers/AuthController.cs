@@ -21,8 +21,6 @@ public class AuthController : ControllerBase
     /// </summary>
     [AllowAnonymous]
     [HttpPost("login")]
-    [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<AuthResponseDto>> Login(
         LoginRequestDto request,
         CancellationToken cancellationToken)
@@ -38,8 +36,7 @@ public class AuthController : ControllerBase
     /// </summary>
     [AllowAnonymous]
     [HttpPost("refresh")]
-    [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+   
     public async Task<ActionResult<AuthResponseDto>> Refresh(
         RefreshTokenRequestDto request,
         CancellationToken cancellationToken)
@@ -55,9 +52,7 @@ public class AuthController : ControllerBase
     /// </summary>
     [Authorize]
     [HttpPost("revoke")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+
     public async Task<IActionResult> Revoke(
         RefreshTokenRequestDto request,
         CancellationToken cancellationToken)

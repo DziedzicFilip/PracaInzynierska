@@ -110,6 +110,7 @@ namespace Api
                 });
 
             builder.Services.AddScoped<ISalaService, SalaService>();
+            builder.Services.AddScoped<IAlergenService, AlergenService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
 

@@ -48,6 +48,7 @@ public class ApplicationDbContext :
     public DbSet<DzieckoPlanZajec> DzieckoPlanyZajec { get; set; } = null!;
     public DbSet<Obecnosc> Obecnosci { get; set; } = null!;
     public DbSet<RejestrPodaniaLekow> RejestryPodaniaLekow { get; set; } = null!;
+    public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -55,6 +56,7 @@ public class ApplicationDbContext :
 
         ConfigureRequiredProperties(builder);
         ConfigureCompositeKeys(builder);
+        ConfigureRefreshTokens(builder);
 
         foreach (var foreignKey in builder.Model.GetEntityTypes()
                      .SelectMany(entityType => entityType.GetForeignKeys()))
@@ -135,5 +137,21 @@ public class ApplicationDbContext :
             .HasKey(entity => new { entity.DzieckoId, entity.DietaId });
         builder.Entity<DzieckoPlanZajec>()
             .HasKey(entity => new { entity.DzieckoId, entity.PlanZajecId });
+    }
+
+    private static void ConfigureRefreshTokens(ModelBuilder builder)
+    {
+        builder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasIndex(token => token.Token).IsUnique();
+            entity.Property(token => token.Token).IsRequired().HasMaxLength(128);
+            entity.Property(token => token.CreatedAtUtc).IsRequired();
+            entity.Property(token => token.ExpiresAtUtc).IsRequired();
+
+            entity.HasOne(token => token.User)
+                .WithMany()
+                .HasForeignKey(token => token.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 }

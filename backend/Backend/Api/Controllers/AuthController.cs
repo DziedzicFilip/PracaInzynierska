@@ -16,9 +16,7 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
-    /// <summary>
-    /// Loguje użytkownika i zwraca parę access/refresh token.
-    /// </summary>
+    
     [AllowAnonymous]
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponseDto>> Login(
@@ -31,9 +29,7 @@ public class AuthController : ControllerBase
             : Unauthorized(new { Error = "Nieprawidłowy e-mail lub hasło." });
     }
 
-    /// <summary>
-    /// Rotuje refresh token i zwraca nową parę tokenów.
-    /// </summary>
+    
     [AllowAnonymous]
     [HttpPost("refresh")]
    
@@ -47,9 +43,7 @@ public class AuthController : ControllerBase
             : Unauthorized(new { Error = "Refresh token jest nieprawidłowy, wygasły lub unieważniony." });
     }
 
-    /// <summary>
-    /// Unieważnia wskazany refresh token.
-    /// </summary>
+    
     [Authorize]
     [HttpPost("revoke")]
 

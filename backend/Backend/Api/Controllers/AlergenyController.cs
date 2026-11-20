@@ -18,9 +18,7 @@ public class AlergenyController : ControllerBase
         _alergenService = alergenService;
     }
 
-    /// <summary>
-    /// Zwraca listę wszystkich alergenów.
-    /// </summary>
+    
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyCollection<AlergenDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IReadOnlyCollection<AlergenDto>>> GetAll(
@@ -30,9 +28,7 @@ public class AlergenyController : ControllerBase
         return Ok(alergeny);
     }
 
-    /// <summary>
-    /// Zwraca alergen o wskazanym identyfikatorze.
-    /// </summary>
+
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(AlergenDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -44,9 +40,7 @@ public class AlergenyController : ControllerBase
         return alergen is null ? NotFound() : Ok(alergen);
     }
 
-    /// <summary>
-    /// Tworzy nowy alergen.
-    /// </summary>
+    
     [HttpPost]
     [Authorize(Roles = $"{SystemRoles.Administrator},{SystemRoles.SuperAdministrator}")]
 
@@ -64,9 +58,7 @@ public class AlergenyController : ControllerBase
             createdAlergen);
     }
 
-    /// <summary>
-    /// Aktualizuje istniejący alergen.
-    /// </summary>
+  
     [HttpPut("{id:int}")]
     [Authorize(Roles = $"{SystemRoles.Administrator},{SystemRoles.SuperAdministrator}")]
     
@@ -83,9 +75,7 @@ public class AlergenyController : ControllerBase
         return updated ? NoContent() : NotFound();
     }
 
-    /// <summary>
-    /// Usuwa istniejący alergen.
-    /// </summary>
+    
     [HttpDelete("{id:int}")]
     [Authorize(Roles = $"{SystemRoles.Administrator},{SystemRoles.SuperAdministrator}")]
 

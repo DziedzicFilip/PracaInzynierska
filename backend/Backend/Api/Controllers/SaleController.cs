@@ -1,11 +1,14 @@
 using Api.Dtos;
 using Api.Services.Interfaces;
+using Api.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
 
 [ApiController]
 [Route("api/sale")]
+[Authorize]
 public class SaleController : ControllerBase
 {
     private readonly ISalaService _salaService;
@@ -33,6 +36,7 @@ public class SaleController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = SystemRoles.Administrator)]
     public async Task<ActionResult<SalaDto>> Create(
         SalaDto sala,
         CancellationToken cancellationToken)
@@ -45,6 +49,7 @@ public class SaleController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = SystemRoles.Administrator)]
     public async Task<IActionResult> Update(
         int id,
         SalaDto sala,
@@ -55,6 +60,7 @@ public class SaleController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = SystemRoles.Administrator)]
     public async Task<IActionResult> Delete(
         int id,
         CancellationToken cancellationToken)

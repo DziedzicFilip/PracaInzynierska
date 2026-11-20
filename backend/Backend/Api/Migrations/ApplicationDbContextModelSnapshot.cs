@@ -878,6 +878,41 @@ namespace Api.Migrations
                     b.ToTable("PrzeciwwskazaniaMedyczne");
                 });
 
+            modelBuilder.Entity("Api.Models.RefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiresAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("Api.Models.RejestrPodaniaLekow", b =>
                 {
                     b.Property<int>("Id")
@@ -1623,6 +1658,17 @@ namespace Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Dziecko");
+                });
+
+            modelBuilder.Entity("Api.Models.RefreshToken", b =>
+                {
+                    b.HasOne("Api.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Api.Models.RejestrPodaniaLekow", b =>

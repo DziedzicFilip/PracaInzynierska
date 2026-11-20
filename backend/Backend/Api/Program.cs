@@ -16,6 +16,7 @@ namespace Api
     {
         public static void Main(string[] args)
         {
+            EnvironmentFileLoader.Load(AppContext.BaseDirectory);
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.

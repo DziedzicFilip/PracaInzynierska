@@ -18,34 +18,47 @@ public static class IdentityDataSeeder
             }
         }
 
-        var adminEmail = configuration["Seed:AdminEmail"];
-        var adminPassword = configuration["Seed:AdminPassword"];
-        if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword))
+        var superAdminUserName =
+            configuration["SUPERADMIN_USERNAME"] ?? Environment.GetEnvironmentVariable("SUPERADMIN_USERNAME");
+        var superAdminEmail =
+            configuration["SUPERADMIN_EMAIL"] ?? Environment.GetEnvironmentVariable("SUPERADMIN_EMAIL");
+        var superAdminPassword =
+            configuration["SUPERADMIN_PASSWORD"] ?? Environment.GetEnvironmentVariable("SUPERADMIN_PASSWORD");
+
+        if (string.IsNullOrWhiteSpace(superAdminUserName) ||
+            string.IsNullOrWhiteSpace(superAdminEmail) ||
+            string.IsNullOrWhiteSpace(superAdminPassword))
         {
-            return;
+            throw new InvalidOperationException(
+                "W .env muszą być ustawione: SUPERADMIN_USERNAME, SUPERADMIN_EMAIL i SUPERADMIN_PASSWORD.");
         }
 
-        var admin = await userManager.FindByEmailAsync(adminEmail);
-        if (admin is null)
+        var superAdmin = await userManager.FindByEmailAsync(superAdminEmail);
+        if (superAdmin is null)
         {
-            admin = new ApplicationUser
+            superAdmin = new ApplicationUser
             {
-                UserName = "administrator",
-                Email = adminEmail,
+                UserName = superAdminUserName,
+                Email = superAdminEmail,
                 EmailConfirmed = true
             };
 
-            var createResult = await userManager.CreateAsync(admin, adminPassword);
+            var createResult = await userManager.CreateAsync(superAdmin, superAdminPassword);
             if (!createResult.Succeeded)
             {
                 throw new InvalidOperationException(
-                    $"Nie udało się utworzyć konta administratora: {string.Join("; ", createResult.Errors.Select(error => error.Description))}");
+                    $"Nie udało się utworzyć konta superadmina: {string.Join("; ", createResult.Errors.Select(error => error.Description))}");
             }
         }
 
-        if (!await userManager.IsInRoleAsync(admin, SystemRoles.Administrator))
+        if (!await userManager.IsInRoleAsync(superAdmin, SystemRoles.SuperAdministrator))
         {
-            await userManager.AddToRoleAsync(admin, SystemRoles.Administrator);
+            await userManager.AddToRoleAsync(superAdmin, SystemRoles.SuperAdministrator);
+        }
+
+        if (!await userManager.IsInRoleAsync(superAdmin, SystemRoles.Administrator))
+        {
+            await userManager.AddToRoleAsync(superAdmin, SystemRoles.Administrator);
         }
     }
 }

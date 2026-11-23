@@ -1,0 +1,305 @@
+Table role {
+  id serial [pk, increment]
+  nazwa varchar(50) [not null]
+}
+
+Table uzytkownicy {
+  id serial [pk, increment]
+  rola_id int [ref: > role.id]
+  nazwa_uzytkownika varchar(100) [not null, unique]
+  haslo varchar(255) [not null]
+  email varchar(255) [not null, unique]
+  numer_telefonu varchar(20)
+}
+
+Table sale {
+  id serial [pk, increment]
+  nazwa varchar(100) [not null]
+  typ_sali varchar(50) [not null, default: 'dydaktyczna']
+}
+
+Table alergeny {
+  id serial [pk, increment]
+  nazwa varchar(100) [not null]
+}
+
+Table diety {
+  id serial [pk, increment]
+  nazwa varchar(100) [not null]
+}
+
+Table zajecia {
+  id serial [pk, increment]
+  nazwa varchar(150) [not null]
+  typ_zajec varchar(50) [not null, default: 'podstawowe']
+}
+
+Table posilki {
+  id serial [pk, increment]
+  data date [not null]
+  nazwa varchar(150) [not null]
+  opis text
+}
+
+Table pomoce_dydaktyczne {
+  id serial [pk, increment]
+  nazwa varchar(200) [not null]
+  typ varchar(100)
+  stan_ilosciowy int [not null, default: 1]
+  sala_przypisana_id int [ref: > sale.id]
+}
+
+Table posilek_alergen {
+  posilek_id int [not null, ref: > posilki.id]
+  alergen_id int [not null, ref: > alergeny.id]
+
+  indexes {
+    (posilek_id, alergen_id) [pk]
+  }
+}
+
+Table pracownicy {
+  id serial [pk, increment]
+  uzytkownik_id int [not null, unique, ref: - uzytkownicy.id]
+  imie varchar(100) [not null]
+  nazwisko varchar(100) [not null]
+}
+
+Table rodzice {
+  id serial [pk, increment]
+  uzytkownik_id int [not null, unique, ref: - uzytkownicy.id]
+  imie varchar(100) [not null]
+  nazwisko varchar(100) [not null]
+  kod_pin_odbior varchar(10)
+}
+
+Table grupy {
+  id serial [pk, increment]
+  nazwa varchar(100) [not null]
+  wiek_dzieci varchar(50)
+  wychowawca_id int [ref: > pracownicy.id]
+  sala_id int [ref: > sale.id]
+}
+
+Table wydarzenia_kalendarz {
+  id serial [pk, increment]
+  nazwa varchar(255) [not null]
+  opis text
+  data_wydarzenia date [not null]
+  godzina_rozpoczecia time
+  godzina_zakonczenia time
+  pracownik_odpowiedzialny_id int [ref: > pracownicy.id]
+}
+
+Table grafik_pracy {
+  id serial [pk, increment]
+  pracownik_id int [not null, ref: > pracownicy.id]
+  data date [not null]
+  godzina_rozpoczecia time [not null]
+  godzina_zakonczenia time [not null]
+}
+
+Table nieobecnosci_pracownikow {
+  id serial [pk, increment]
+  pracownik_id int [not null, ref: > pracownicy.id]
+  zastepca_id int [ref: > pracownicy.id]
+  powod varchar(100)
+  data_od date [not null]
+  data_do date [not null]
+}
+
+Table nadgodziny_pracownikow {
+  id serial [pk, increment]
+  pracownik_id int [not null, ref: > pracownicy.id]
+  data date [not null]
+  ilosc_godzin decimal(5,2) [not null]
+  powod varchar(255)
+}
+
+Table badania_szkolenia_pracownikow {
+  id serial [pk, increment]
+  pracownik_id int [not null, ref: > pracownicy.id]
+  typ varchar(100) [not null]
+  data_waznosci date [not null]
+}
+
+Table rezerwacje_sal {
+  id serial [pk, increment]
+  sala_id int [not null, ref: > sale.id]
+  pracownik_id int [not null, ref: > pracownicy.id]
+  cel varchar(255)
+  data_rezerwacji date [not null]
+  godzina_od time [not null]
+  godzina_do time [not null]
+}
+
+Table rezerwacje_pomocy_dydaktycznych {
+  id serial [pk, increment]
+  pomoc_id int [not null, ref: > pomoce_dydaktyczne.id]
+  pracownik_id int [not null, ref: > pracownicy.id]
+  data_od timestamp [not null]
+  data_do timestamp [not null]
+}
+
+Table usterki_pomocy_dydaktycznych {
+  id serial [pk, increment]
+  pomoc_id int [not null, ref: > pomoce_dydaktyczne.id]
+  pracownik_zglaszajacy_id int [not null, ref: > pracownicy.id]
+  opis text [not null]
+  data_zgloszenia timestamp [not null]
+  status varchar(50) [not null, default: 'Zgłoszona']
+}
+
+Table dzieci {
+  id serial [pk, increment]
+  imie varchar(100) [not null]
+  nazwisko varchar(100) [not null]
+  data_urodzenia date [not null]
+  grupa_id int [ref: > grupy.id]
+}
+
+Table plany_zajec {
+  id serial [pk, increment]
+  zajecie_id int [not null, ref: > zajecia.id]
+  grupa_id int [not null, ref: > grupy.id]
+  sala_id int [ref: > sale.id]
+  pracownik_id int [ref: > pracownicy.id]
+  dzien_tygodnia int [not null]
+  czas_rozpoczecia time [not null]
+  czas_zakonczenia time [not null]
+}
+
+Table dziennik_zajec {
+  id serial [pk, increment]
+  grupa_id int [not null, ref: > grupy.id]
+  pracownik_id int [not null, ref: > pracownicy.id]
+  data date [not null]
+  temat varchar(255) [not null]
+  podstawa_programowa text
+}
+
+Table plan_dnia_grupy {
+  id serial [pk, increment]
+  grupa_id int [not null, ref: > grupy.id]
+  godzina_od time [not null]
+  godzina_do time [not null]
+  czynnosc varchar(255) [not null]
+}
+
+Table ogloszenia {
+  id serial [pk, increment]
+  autor_id int [not null, ref: > pracownicy.id]
+  grupa_id int [ref: > grupy.id]
+  tytul varchar(255) [not null]
+  tresc text [not null]
+  data_publikacji timestamp [not null]
+}
+
+Table rodzic_dziecko {
+  rodzic_id int [not null, ref: > rodzice.id]
+  dziecko_id int [not null, ref: > dzieci.id]
+
+  indexes {
+    (rodzic_id, dziecko_id) [pk]
+  }
+}
+
+Table osoby_upowaznione_odbior {
+  id serial [pk, increment]
+  dziecko_id int [not null, ref: > dzieci.id]
+  imie varchar(100) [not null]
+  nazwisko varchar(100) [not null]
+  jednorazowy_kod_pin varchar(10)
+}
+
+Table dziecko_alergen {
+  dziecko_id int [not null, ref: > dzieci.id]
+  alergen_id int [not null, ref: > alergeny.id]
+
+  indexes {
+    (dziecko_id, alergen_id) [pk]
+  }
+}
+
+Table dziecko_dieta {
+  dziecko_id int [not null, ref: > dzieci.id]
+  dieta_id int [not null, ref: > diety.id]
+
+  indexes {
+    (dziecko_id, dieta_id) [pk]
+  }
+}
+
+Table odwolania_posilkow {
+  id serial [pk, increment]
+  dziecko_id int [not null, ref: > dzieci.id]
+  data_posilku date [not null]
+  data_zgloszenia timestamp [not null]
+}
+
+Table incydenty {
+  id serial [pk, increment]
+  dziecko_id int [not null, ref: > dzieci.id]
+  rodzic_id int [ref: > rodzice.id]
+  pracownik_id int [not null, ref: > pracownicy.id]
+  powod text [not null]
+  typ_incydentu varchar(100) [not null, default: 'zdrowotny']
+  data_zgloszenia timestamp [not null]
+  protokol_bhp boolean [not null, default: false]
+}
+
+Table przeciwwskazania_medyczne {
+  id serial [pk, increment]
+  dziecko_id int [not null, ref: > dzieci.id]
+  opis text [not null]
+}
+
+Table leki_dzieci {
+  id serial [pk, increment]
+  dziecko_id int [not null, ref: > dzieci.id]
+  nazwa_leku varchar(150) [not null]
+  dawka varchar(100) [not null]
+  godzina_podania time
+  data_od date [not null]
+  data_do date [not null]
+  uwagi text
+  zgoda_rodzica boolean [not null, default: true]
+}
+
+Table karty_obserwacji_pedagogicznej {
+  id serial [pk, increment]
+  dziecko_id int [not null, ref: > dzieci.id]
+  pracownik_id int [not null, ref: > pracownicy.id]
+  specjalizacja varchar(100) [not null]
+  notatka text [not null]
+  data_wpisu timestamp [not null]
+}
+
+Table dziecko_plan_zajec {
+  dziecko_id int [not null, ref: > dzieci.id]
+  plan_zajec_id int [not null, ref: > plany_zajec.id]
+
+  indexes {
+    (dziecko_id, plan_zajec_id) [pk]
+  }
+}
+
+Table obecnosci {
+  id serial [pk, increment]
+  dziecko_id int [not null, ref: > dzieci.id]
+  data date [not null]
+  status varchar(50) [not null]
+  godzina_przyjscia time
+  godzina_odbioru time
+  rodzic_odbierajacy_id int [ref: > rodzice.id]
+  osoba_upowazniona_id int [ref: > osoby_upowaznione_odbior.id]
+  metoda_rejestracji varchar(50)
+}
+
+Table rejestr_podania_lekow {
+  id serial [pk, increment]
+  lek_id int [not null, ref: > leki_dzieci.id]
+  pracownik_id int [not null, ref: > pracownicy.id]
+  data_podania timestamp [not null]
+  potwierdzenie_podpisu boolean [not null, default: true]
+}

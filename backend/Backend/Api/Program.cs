@@ -111,29 +111,77 @@ namespace Api
 
             builder.Services.AddScoped<ISalaService, SalaService>();
             builder.Services.AddScoped<IAlergenService, AlergenService>();
+            builder.Services.AddScoped<IDietaService, DietaService>();
+            builder.Services.AddScoped<IZajecieService, ZajecieService>();
+            builder.Services.AddScoped<IPosilekService, PosilekService>();
+            builder.Services.AddScoped<IPomocDydaktycznaService, PomocDydaktycznaService>();
+            builder.Services.AddScoped<IPosilekAlergenService, PosilekAlergenService>();
+            builder.Services.AddScoped<IPracownikService, PracownikService>();
+            builder.Services.AddScoped<IRodzicService, RodzicService>();
+            builder.Services.AddScoped<IGrupaService, GrupaService>();
+            builder.Services.AddScoped<IWydarzenieKalendarzService, WydarzenieKalendarzService>();
+            builder.Services.AddScoped<IGrafikPracyService, GrafikPracyService>();
+            builder.Services.AddScoped<INieobecnoscPracownikaService, NieobecnoscPracownikaService>();
+            builder.Services.AddScoped<INadgodzinyPracownikaService, NadgodzinyPracownikaService>();
+            builder.Services.AddScoped<IBadanieSzkoleniePracownikaService, BadanieSzkoleniePracownikaService>();
+            builder.Services.AddScoped<IRezerwacjaSaliService, RezerwacjaSaliService>();
+            builder.Services.AddScoped<IRezerwacjaPomocyService, RezerwacjaPomocyService>();
+            builder.Services.AddScoped<IUsterkaPomocyService, UsterkaPomocyService>();
+            builder.Services.AddScoped<IDzieckoService, DzieckoService>();
+            builder.Services.AddScoped<IPlanZajecService, PlanZajecService>();
+            builder.Services.AddScoped<IDziennikZajecService, DziennikZajecService>();
+            builder.Services.AddScoped<IPlanDniaGrupyService, PlanDniaGrupyService>();
+            builder.Services.AddScoped<IOgloszenieService, OgloszenieService>();
+            builder.Services.AddScoped<IRodzicDzieckoService, RodzicDzieckoService>();
+            builder.Services.AddScoped<IOsobaUpowaznionaOdbiorService, OsobaUpowaznionaOdbiorService>();
+            builder.Services.AddScoped<IDzieckoAlergenService, DzieckoAlergenService>();
+            builder.Services.AddScoped<IDzieckoDietaService, DzieckoDietaService>();
+            builder.Services.AddScoped<IOdwolaniePosilkuService, OdwolaniePosilkuService>();
+            builder.Services.AddScoped<IIncydentService, IncydentService>();
+            builder.Services.AddScoped<IPrzeciwskazanieMedyczneService, PrzeciwskazanieMedyczneService>();
+            builder.Services.AddScoped<ILekDzieckaService, LekDzieckaService>();
+            builder.Services.AddScoped<IKartaObserwacjiPedagogicznejService, KartaObserwacjiPedagogicznejService>();
+            builder.Services.AddScoped<IDzieckoPlanZajecService, DzieckoPlanZajecService>();
+            builder.Services.AddScoped<IObecnoscService, ObecnoscService>();
+            builder.Services.AddScoped<IRejestrPodaniaLekowService, RejestrPodaniaLekowService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
+
             var app = builder.Build();
 
-            if (app.Environment.IsDevelopment())
+            if (!app.Environment.IsEnvironment("Testing"))
             {
                 using var scope = app.Services.CreateScope();
                 var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                dbContext.Database.Migrate();
+                if (dbContext.Database.IsRelational())
+                {
+                    dbContext.Database.Migrate();
+                }
                 IdentityDataSeeder.SeedAsync(scope.ServiceProvider, builder.Configuration)
                     .GetAwaiter()
                     .GetResult();
             }
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             app.UseHttpsRedirection();
+
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
+
+            app.UseCors();
 
             app.UseAuthentication();
             app.UseAuthorization();

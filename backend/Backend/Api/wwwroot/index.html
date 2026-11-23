@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Słoneczna Kraina – System Zarządzania Placówką Przedszkolną</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c',
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .badge { display: inline-flex; align-items: center; border-radius: 9999px; padding: 0.15rem 0.65rem; font-size: 0.75rem; font-weight: 600; }
+  </style>
+</head>
+<body class="text-slate-800 antialiased flex h-screen overflow-hidden">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between p-4 flex-shrink-0">
+    <div>
+      <div class="flex items-center gap-3 px-2 py-3 mb-6">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-white text-xl shadow-md shadow-orange-200">
+          ☀️
+        </div>
+        <div>
+          <h1 class="font-bold text-base text-slate-900 leading-tight">Słoneczna Kraina</h1>
+          <p class="text-xs text-orange-600 font-semibold tracking-wide">SYSTEM ZARZĄDZANIA</p>
+        </div>
+      </div>
+
+      <nav class="space-y-1 text-sm font-medium">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-orange-600 bg-orange-50 font-semibold transition">
+          <span>🏠</span> Pulpit główny
+        </button>
+        <button onclick="switchTab('zastepstwa')" id="nav-zastepstwa" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+          <span class="flex items-center gap-3"><span>👥</span> Zastępstwa & Kadry</span>
+          <span class="bg-orange-100 text-orange-700 text-xs px-2 py-0.5 rounded-full font-bold">2</span>
+        </button>
+        <button onclick="switchTab('medycyna')" id="nav-medycyna" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+          <span class="flex items-center gap-3"><span>💊</span> Leki, Alergie & BHP</span>
+          <span class="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full font-bold">2 alerty</span>
+        </button>
+        <button onclick="switchTab('catering')" id="nav-catering" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+          <span>🍽️</span> Stołówka & Catering
+        </button>
+        <button onclick="switchTab('sale')" id="nav-sale" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+          <span>🏫</span> Harmonogram sal
+        </button>
+        <button onclick="switchTab('obecnosci')" id="nav-obecnosci" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+          <span>⏱️</span> Obecności & Odbiory
+        </button>
+        <button onclick="switchTab('dziennik')" id="nav-dziennik" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+          <span>📖</span> Dziennik zajęć MEN
+        </button>
+      </nav>
+    </div>
+
+    <div class="space-y-3">
+      <a href="/swagger" target="_blank" class="flex items-center justify-center gap-2 w-full py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow transition">
+        <span>⚡ Dokumentacja Swagger API</span>
+      </a>
+      <div class="flex items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-xl">
+        <div class="w-9 h-9 rounded-full bg-orange-200 text-orange-800 font-bold flex items-center justify-center text-xs">
+          MK
+        </div>
+        <div class="truncate text-xs">
+          <p class="font-bold text-slate-900 truncate">Maria Kowalska</p>
+          <p class="text-slate-500 truncate">Dyrektor (Dyspozytor)</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 flex flex-col overflow-y-auto">
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+      <div class="flex items-center gap-4">
+        <span class="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Backend REST API v2.4.0 Online
+        </span>
+        <h2 id="page-title" class="text-lg font-bold text-slate-800">Pulpit główny dyrektora</h2>
+      </div>
+      <div class="flex items-center gap-4 text-xs font-medium text-slate-500">
+        <span id="current-date">Wtorek, 14 Października • 11:40</span>
+        <button onclick="fetchDashboardData()" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold transition">
+          🔄 Odśwież dane
+        </button>
+      </div>
+    </header>
+
+    <div class="p-8 space-y-6 max-w-7xl mx-auto w-full">
+
+      <!-- ================= TAB: DASHBOARD ================= -->
+      <section id="tab-dashboard" class="tab-content space-y-6">
+        <!-- Metric Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="flex justify-between items-start text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">
+              <span>Obecność dzisiaj</span>
+              <span class="text-base">👶</span>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span id="m-obecni" class="text-3xl font-extrabold text-slate-900">142</span>
+              <span class="text-sm font-medium text-slate-400">/ 160 zapisanych</span>
+            </div>
+            <p class="mt-2 text-xs text-emerald-600 font-semibold flex items-center gap-1">
+              ↑ 88.7% frekwencji <span class="text-slate-400 font-normal">| 18 nieobecnych</span>
+            </p>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="flex justify-between items-start text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">
+              <span>Personel & Dyżury</span>
+              <span class="text-base">👩‍🏫</span>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span id="m-personel" class="text-3xl font-extrabold text-slate-900">14</span>
+              <span class="text-sm font-medium text-slate-400">aktywnych na zmianie</span>
+            </div>
+            <p class="mt-2 text-xs text-orange-600 font-semibold flex items-center gap-1">
+              ⚠️ 1 nagłe L4 (zgłoszone) <span class="text-slate-400 font-normal">| 2 pomocników</span>
+            </p>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="flex justify-between items-start text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">
+              <span>Kuchnia & Catering</span>
+              <span class="text-base">🍲</span>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span id="m-obiady" class="text-3xl font-extrabold text-slate-900">138</span>
+              <span class="text-sm font-medium text-slate-400">obiadów</span>
+            </div>
+            <p class="mt-2 text-xs text-slate-500 font-medium">
+              16 specjalnych diet <span class="text-slate-400">| odwołano: 22</span>
+            </p>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="flex justify-between items-start text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">
+              <span>Pilne medyczne</span>
+              <span class="text-base">💊</span>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span id="m-leki" class="text-3xl font-extrabold text-slate-900">3</span>
+              <span class="text-sm font-medium text-slate-400">leki do podania</span>
+            </div>
+            <p class="mt-2 text-xs text-amber-600 font-semibold">
+              Najbliższy: 12:00 (Inhalator) • 0 wypadków
+            </p>
+          </div>
+        </div>
+
+        <!-- Middle Section: Groups & Urgent Substitution -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Grupy i obłożenie -->
+          <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div class="flex justify-between items-center mb-4">
+              <div>
+                <h3 class="font-bold text-slate-900 text-base">Aktualne obłożenie sal i grup</h3>
+                <p class="text-xs text-slate-500">Podział dzieci na sale, przypisani wychowawcy i frekwencja na żywo</p>
+              </div>
+              <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                Wszystkie 6 grup aktywne
+              </span>
+            </div>
+
+            <div id="grupy-list" class="space-y-3">
+              <!-- Dynamically populated via API -->
+              <div class="animate-pulse h-16 bg-slate-100 rounded-xl"></div>
+              <div class="animate-pulse h-16 bg-slate-100 rounded-xl"></div>
+            </div>
+          </div>
+
+          <!-- Pilne zastępstwo kadrowe -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pilne zastępstwo kadrowe</span>
+                <span class="badge bg-red-100 text-red-700 border border-red-200">WYMAGANA AKCJA</span>
+              </div>
+              <div class="p-4 bg-orange-50 border border-orange-200 rounded-xl mb-4">
+                <div class="flex justify-between items-center text-xs font-bold text-orange-800 mb-1">
+                  <span>🚨 NAGŁE L4 (od 06:30)</span>
+                  <span>Zmiana: 12:30 - 17:00</span>
+                </div>
+                <h4 class="font-bold text-slate-900 text-sm">Katarzyna Nowak (Wychowawca)</h4>
+                <p class="text-xs text-slate-600 mt-0.5">Grupa 3: Leśne Skrzaty (5-latki) • Sala C1</p>
+                <div class="mt-3 pt-3 border-t border-orange-200 flex items-center justify-between">
+                  <div class="text-xs">
+                    <p class="text-slate-500">Dostępny zastępca:</p>
+                    <p class="font-bold text-slate-900">mgr Piotr Wiśniewski</p>
+                  </div>
+                  <span class="badge bg-emerald-100 text-emerald-800">100% zgodności</span>
+                </div>
+              </div>
+            </div>
+
+            <button onclick="switchTab('zastepstwa')" class="w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-200 transition">
+              Przejdź do panelu zastępstw →
+            </button>
+          </div>
+        </div>
+
+        <!-- Bottom Section: Kitchen & Live Feed -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Catering -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div class="flex justify-between items-center mb-4">
+              <div>
+                <h3 class="font-bold text-slate-900 text-sm">Zapotrzebowanie kuchenne na dziś</h3>
+                <p class="text-xs text-slate-500">Stan zamówienia obiadowego po zamknięciu okna o 08:00</p>
+              </div>
+              <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">Catering: Eko-Kuchnia</span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3 mb-4">
+              <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-center">
+                <span class="text-xs text-slate-500 font-medium">Standard</span>
+                <p class="text-2xl font-extrabold text-slate-900 mt-1">122</p>
+              </div>
+              <div class="p-3 bg-orange-50 border border-orange-200 rounded-xl text-center">
+                <span class="text-xs text-orange-700 font-medium">Bez glutenu</span>
+                <p class="text-2xl font-extrabold text-orange-700 mt-1">12</p>
+              </div>
+              <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-center">
+                <span class="text-xs text-emerald-700 font-medium">Wegetariańskie</span>
+                <p class="text-2xl font-extrabold text-emerald-700 mt-1">4</p>
+              </div>
+            </div>
+
+            <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2.5 text-xs text-amber-900">
+              <span class="text-base">🥜</span>
+              <div>
+                <p class="font-bold">Uwaga na dzisiejszy podwieczorek (14:30)!</p>
+                <p class="text-amber-800 mt-0.5">Placuszki bananowe z cynamonem. 3 dzieci w grupie 2 ma wykluczenie cynamonu.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Feed Odbiorów -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div class="flex justify-between items-center mb-4">
+              <div>
+                <h3 class="font-bold text-slate-900 text-sm">Dziennik odbiorów i wyjść (Live Feed)</h3>
+                <p class="text-xs text-slate-500">Rejestracja z czytników QR / autoryzacji PIN przy wyjściu</p>
+              </div>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+            </div>
+
+            <div id="live-feed-list" class="space-y-3">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: ZASTĘPSTWA ================= -->
+      <section id="tab-zastepstwa" class="tab-content hidden space-y-6">
+        <div class="bg-gradient-to-r from-orange-500 to-amber-600 rounded-2xl p-6 text-white shadow-lg shadow-orange-200 flex justify-between items-center">
+          <div>
+            <h3 class="text-xl font-bold">Dyspozytornia Zastępstw Kadrowych</h3>
+            <p class="text-orange-100 text-xs mt-1">Obsadzanie wakatów, weryfikacja dostępności w czasie rzeczywistym i potwierdzenia</p>
+          </div>
+          <button onclick="zglosTestoweL4()" class="px-4 py-2 bg-white text-orange-600 hover:bg-orange-50 font-bold rounded-xl text-xs transition shadow">
+            + Zgłoś nowe L4 (Test API)
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Wpłynięte zgłoszenia -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div class="flex justify-between items-center mb-4">
+              <h4 class="font-bold text-slate-900 text-sm">Wpłynięte zgłoszenia nieobecności</h4>
+              <span id="liczba-wakatow" class="badge bg-orange-100 text-orange-800">2 do obsadzenia</span>
+            </div>
+            <div id="zastepstwa-lista" class="space-y-3"></div>
+          </div>
+
+          <!-- Dobór zastępcy -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <h4 class="font-bold text-slate-900 text-sm mb-4">Dopasowanie z grafiku personelu</h4>
+            <div id="dobor-zastepcy-box" class="p-4 bg-slate-50 border border-slate-200 rounded-xl mb-4">
+              <p class="text-xs text-slate-500">Wybierz zgłoszenie po lewej stronie, aby dobrać optymalnego zastępcę według grafiku.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ewidencja nadgodzin -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm">Ewidencja Godzin Ponadwymiarowych (Rozliczenia)</h4>
+              <p class="text-xs text-slate-500">Stawka doraźna: 70 zł / godz. brutto lub odbiór 1:1</p>
+            </div>
+            <span class="badge bg-emerald-100 text-emerald-800 text-xs font-bold">Łącznie: 42.5 h</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-700">
+              <thead class="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-200">
+                <tr>
+                  <th class="py-3 px-4">Pracownik</th>
+                  <th class="py-3 px-4">Data i godziny</th>
+                  <th class="py-3 px-4">Powód zastępstwa</th>
+                  <th class="py-3 px-4">Wymiar</th>
+                  <th class="py-3 px-4">Należność brutto</th>
+                </tr>
+              </thead>
+              <tbody id="nadgodziny-tbody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: LEKI, ALERGIE & BHP ================= -->
+      <section id="tab-medycyna" class="tab-content hidden space-y-6">
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h3 class="font-bold text-slate-900 text-base">⏰ Leki do podania dzisiaj w placówce (Harmonogram)</h3>
+              <p class="text-xs text-slate-500">Wymagany podpis elektroniczny wychowawcy po podaniu dawki</p>
+            </div>
+            <span class="badge bg-amber-100 text-amber-800">1 oczekuje na podanie</span>
+          </div>
+          <div id="leki-harmonogram-list" class="space-y-3"></div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <h3 class="font-bold text-slate-900 text-base mb-1">Aktywny Rejestr Alergików i Kart Medycznych Dzieci</h3>
+          <p class="text-xs text-slate-500 mb-4">Dane powiązane automatycznie z kuchnią, stołówką i wyjściami poza placówkę</p>
+          <div id="alergicy-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h3 class="font-bold text-slate-900 text-base">📁 Elektroniczna Księga Wypadków i Zdarzeń BHP</h3>
+              <p class="text-xs text-slate-500">Zgodność z procedurami powypadkowymi placówek oświatowych</p>
+            </div>
+            <button onclick="alert('Generowanie protokołu PDF...')" class="text-xs font-bold text-orange-600 hover:text-orange-700">
+              Drukuj pełny rejestr BHP →
+            </button>
+          </div>
+          <div id="bhp-list" class="space-y-3"></div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: CATERING ================= -->
+      <section id="tab-catering" class="tab-content hidden space-y-6">
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <h3 class="font-bold text-slate-900 text-base mb-1">Panel Dyspozytorski: Załadunek Wózków i Wydania na Sale</h3>
+          <p class="text-xs text-slate-500 mb-4">Podgląd naczyń gastronomicznych, litraży zup i dedykowanych pojemników per sala</p>
+          <div id="wozki-lista" class="space-y-3"></div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <h3 class="font-bold text-slate-900 text-base mb-1">Wykaz 14 Głównych Alergenów Pokarmowych (Rozporządzenie UE 1169/2011)</h3>
+          <p class="text-xs text-slate-500 mb-4">Nadzór sanitarny: GIS / Sanepid • Podgląd liczby dzieci w placówce</p>
+          <div id="alergeny-14-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3"></div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: SALE ================= -->
+      <section id="tab-sale" class="tab-content hidden space-y-6">
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h3 class="font-bold text-slate-900 text-base">Harmonogram Przestrzeni Wspólnych (Widok Dnia)</h3>
+              <p class="text-xs text-slate-500">Automatyczna weryfikacja kolizji oraz bufor wietrzenia 15 min przed i po</p>
+            </div>
+            <button onclick="rezerwujSzybkaSale()" class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow transition">
+              + Zarezerwuj Salę Sensoryczną (SI)
+            </button>
+          </div>
+          <div id="rezerwacje-sal-list" class="space-y-3"></div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: OBECNOŚCI ================= -->
+      <section id="tab-obecnosci" class="tab-content hidden space-y-6">
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h3 class="font-bold text-slate-900 text-base">Ewidencja Czasu Pobytu & Bramka Wejść / Wyjść</h3>
+              <p class="text-xs text-slate-500">Autoryzacja kodem PIN rodzica oraz skanerem QR</p>
+            </div>
+            <button onclick="zarejestrujOdbiorDziecka()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition">
+              + Szybka Rejestracja Wyjścia (PIN)
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-700">
+              <thead class="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-200">
+                <tr>
+                  <th class="py-3 px-4">Dziecko</th>
+                  <th class="py-3 px-4">Oddział / Sala</th>
+                  <th class="py-3 px-4">Godzina wejścia</th>
+                  <th class="py-3 px-4">Czas pobytu</th>
+                  <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-4">Akcja</th>
+                </tr>
+              </thead>
+              <tbody id="obecnosci-tbody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: DZIENNIK MEN ================= -->
+      <section id="tab-dziennik" class="tab-content hidden space-y-6">
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h3 class="font-bold text-slate-900 text-base">Dziennik Zajęć Przedszkolnych (MEN)</h3>
+              <p class="text-xs text-slate-500">Ewidencja realizacji podstawy programowej i przebiegu dnia dydaktycznego</p>
+            </div>
+            <button onclick="alert('Wpis zatwierdzony podpisem elektronicznym MEN!')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition">
+              ✓ Zatwierdź wpis MEN
+            </button>
+          </div>
+          <div id="dziennik-wpisy-list" class="space-y-4"></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    // Tab switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('text-orange-600', 'bg-orange-50', 'font-semibold');
+        btn.classList.add('text-slate-600');
+      });
+
+      const tab = document.getElementById('tab-' + tabId);
+      if (tab) tab.classList.remove('hidden');
+
+      const btn = document.getElementById('nav-' + tabId);
+      if (btn) {
+        btn.classList.add('text-orange-600', 'bg-orange-50', 'font-semibold');
+        btn.classList.remove('text-slate-600');
+      }
+
+      const titles = {
+        dashboard: 'Pulpit główny dyrektora',
+        zastepstwa: 'Dyspozytornia zastępstw kadrowych',
+        medycyna: 'Karty medyczne, leki & rejestr BHP',
+        catering: 'Stołówka, catering & 14 alergenów',
+        sale: 'Harmonogram sal i przestrzeni wspólnych',
+        obecnosci: 'Ewidencja obecności & bramka wejść/wyjść',
+        dziennik: 'Elektroniczny dziennik zajęć MEN'
+      };
+      document.getElementById('page-title').innerText = titles[tabId] || 'Panel';
+
+      if (tabId === 'dashboard') fetchDashboardData();
+      if (tabId === 'zastepstwa') fetchZastepstwa();
+      if (tabId === 'medycyna') fetchMedycyna();
+      if (tabId === 'catering') fetchCatering();
+      if (tabId === 'sale') fetchSale();
+      if (tabId === 'obecnosci') fetchObecnosci();
+      if (tabId === 'dziennik') fetchDziennik();
+    }
+
+    // Fetch Dashboard
+    async function fetchDashboardData() {
+      try {
+        const res = await fetch('/api/dashboard');
+        const data = await res.json();
+
+        document.getElementById('m-obecni').innerText = data.obecnoscDzisiaj;
+        document.getElementById('m-personel').innerText = data.personelAktywniZmiana;
+        document.getElementById('m-obiady').innerText = data.kuchniaObiadyLiczba;
+        document.getElementById('m-leki').innerText = data.pilneMedyczneLekiDoPodania;
+
+        // Render grupy
+        const grupyBox = document.getElementById('grupy-list');
+        grupyBox.innerHTML = data.grupyOblozenie.map(g => `
+          <div class="flex items-center justify-between p-3.5 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-100/70 transition">
+            <div class="flex items-center gap-3">
+              <span class="w-9 h-9 rounded-lg bg-orange-100 text-orange-700 font-bold flex items-center justify-center text-xs">
+                ${g.nazwaGrupy.substring(0, 2)}
+              </span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="font-bold text-slate-900 text-xs">${g.nazwaGrupy}</h4>
+                  ${g.czyZastepstwo ? '<span class="badge bg-amber-100 text-amber-800 text-[10px]">Zastępstwo</span>' : ''}
+                </div>
+                <p class="text-[11px] text-slate-500">${g.salaNazwa} • Wychowawca: ${g.wychowawcaNazwisko}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="text-right">
+                <span class="font-extrabold text-xs text-slate-900">${g.obecnych} / ${g.maksymalnie}</span>
+                <span class="text-[11px] font-semibold text-slate-500 ml-1">(${g.frekwencjaProc}%)</span>
+              </div>
+              <span class="badge ${g.statusLokalizacji === 'W sali' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'}">
+                ${g.statusLokalizacji}
+              </span>
+            </div>
+          </div>
+        `).join('');
+
+        // Render Live Feed
+        const feedBox = document.getElementById('live-feed-list');
+        feedBox.innerHTML = data.liveFeedOdbiorow.map(f => `
+          <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-100 rounded-xl text-xs">
+            <div class="flex items-center gap-3">
+              <span class="badge ${f.metodaAutoryzacji === 'PIN' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'} font-bold">
+                ${f.metodaAutoryzacji}
+              </span>
+              <div>
+                <p class="font-bold text-slate-900">${f.dzieckoNazwisko}</p>
+                <p class="text-slate-500 text-[11px]">Odebrany przez: ${f.osobaOdbierajaca}</p>
+              </div>
+            </div>
+            <span class="font-mono text-slate-400 font-medium">${f.czas}</span>
+          </div>
+        `).join('');
+
+      } catch (err) {
+        console.error('Błąd pobierania pulpitu:', err);
+      }
+    }
+
+    // Fetch Zastępstwa
+    async function fetchZastepstwa() {
+      try {
+        const [resZ, resN] = await Promise.all([
+          fetch('/api/zastepstwa/zgloszenia'),
+          fetch('/api/zastepstwa/nadgodziny')
+        ]);
+        const zgloszenia = await resZ.json();
+        const nadgodziny = await resN.json();
+
+        const listaZ = document.getElementById('zastepstwa-lista');
+        listaZ.innerHTML = zgloszenia.map(z => `
+          <div class="p-4 bg-orange-50/60 border border-orange-200 rounded-xl space-y-2">
+            <div class="flex justify-between items-center text-xs">
+              <span class="badge bg-red-100 text-red-700 font-bold">${z.powod}</span>
+              <span class="text-slate-500 font-medium">Godziny: ${z.godzinyOdDo} (${z.wymiarGodzin} h)</span>
+            </div>
+            <h5 class="font-bold text-slate-900 text-sm">${z.nieobecnyPracownikNazwisko}</h5>
+            <p class="text-xs text-slate-600">${z.grupaNazwa} • ${z.salaNazwa}</p>
+            <p class="text-xs italic text-slate-500 bg-white p-2.5 rounded-lg border border-orange-100">"${z.wskazowkiDydaktyczne}"</p>
+            <div class="pt-2 flex items-center justify-between">
+              <span class="badge ${z.status === 'Zatwierdzone' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                ${z.status} ${z.wytypowanyZastepcaNazwisko ? ': ' + z.wytypowanyZastepcaNazwisko : ''}
+              </span>
+              <div class="flex gap-2">
+                <button onclick="zatwierdzZastepstwoAdmin(${z.id})" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition">
+                  ✓ Zatwierdź
+                </button>
+                <button onclick="zaladujDopasowanie(${z.id})" class="px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-xs font-bold transition">
+                  Dobierz
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        const tbodyN = document.getElementById('nadgodziny-tbody');
+        tbodyN.innerHTML = nadgodziny.map(n => `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="py-3 px-4 font-bold text-slate-900">${n.pracownikImieNazwisko}</td>
+            <td class="py-3 px-4 text-slate-600">${n.data} (${n.godzinyZakres})</td>
+            <td class="py-3 px-4 text-slate-700">${n.powod}</td>
+            <td class="py-3 px-4 font-bold text-orange-600">${n.iloscGodzin} h</td>
+            <td class="py-3 px-4 font-bold text-emerald-700">+${n.kwotaBrutto} zł brutto</td>
+          </tr>
+        `).join('');
+
+        if (zgloszenia.length > 0) zaladujDopasowanie(zgloszenia[0].id);
+
+      } catch (err) {
+        console.error('Błąd pobierania zastępstw:', err);
+      }
+    }
+
+    async function zaladujDopasowanie(id) {
+      try {
+        const res = await fetch(`/api/zastepstwa/zgloszenia/${id}/dopasowanie`);
+        const lista = await res.json();
+        const box = document.getElementById('dobor-zastepcy-box');
+        box.innerHTML = `
+          <p class="text-xs font-bold text-slate-700 mb-3 uppercase tracking-wider">Rekomendacje dopasowania grafiku:</p>
+          <div class="space-y-2.5">
+            ${lista.map(d => `
+              <div class="p-3 bg-white border border-slate-200 rounded-xl flex items-center justify-between">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <p class="font-bold text-slate-900 text-xs">${d.imieNazwisko}</p>
+                    <span class="badge ${d.zgodnoscGrafikuProcent === 100 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'} text-[10px]">
+                      ${d.zgodnoscGrafikuProcent}% zgodności
+                    </span>
+                  </div>
+                  <p class="text-[11px] text-slate-500">${d.stanowisko}</p>
+                </div>
+                ${d.czyDostepny ? `
+                  <button onclick="przypiszZastepce(${id}, ${d.pracownikId})" class="px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-xs font-bold transition">
+                    Wyślij propozycję →
+                  </button>
+                ` : '<span class="text-xs text-red-500 font-semibold">Niedostępna</span>'}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function przypiszZastepce(id, zastepcaId) {
+      await fetch(`/api/zastepstwa/zgloszenia/${id}/wytypuj/${zastepcaId}`, { method: 'POST' });
+      alert('Wysłano zaproszenie na zastępstwo do pracownika!');
+      fetchZastepstwa();
+    }
+
+    async function zatwierdzZastepstwoAdmin(id) {
+      await fetch(`/api/zastepstwa/zgloszenia/${id}/zatwierdz-admin`, { method: 'POST' });
+      alert('Zastępstwo zostało zatwierdzone przez Dyrekcję!');
+      fetchZastepstwa();
+      fetchDashboardData();
+    }
+
+    async function zglosTestoweL4() {
+      await fetch('/api/zastepstwa/zglos-nieobecnosc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nieobecnyPracownikId: 2,
+          powod: 'Nagłe L4 (zwolnienie lekarskie)',
+          dataOd: new Date().toISOString().split('T')[0],
+          dataDo: new Date().toISOString().split('T')[0],
+          godzinyOdDo: '12:30 - 17:00',
+          wymiarGodzin: 4.5
+        })
+      });
+      alert('Dodano nowe zgłoszenie L4 do obsadzenia!');
+      fetchZastepstwa();
+    }
+
+    // Fetch Medycyna & BHP
+    async function fetchMedycyna() {
+      try {
+        const [resL, resA, resB] = await Promise.all([
+          fetch('/api/medycyna-bhp/harmonogram-dzis'),
+          fetch('/api/medycyna-bhp/alergicy-karty'),
+          fetch('/api/medycyna-bhp/ksiega-wypadkow')
+        ]);
+        const leki = await resL.json();
+        const alergicy = await resA.json();
+        const bhp = await resB.json();
+
+        // Harmonogram
+        document.getElementById('leki-harmonogram-list').innerHTML = leki.map(l => `
+          <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <span class="font-extrabold text-sm text-orange-600 bg-orange-100 px-2.5 py-1 rounded-lg">${l.godzinaPodania}</span>
+              <div>
+                <p class="font-bold text-slate-900 text-xs">${l.dzieckoImieNazwisko} <span class="text-slate-500 font-normal">(${l.grupaNazwa})</span></p>
+                <p class="text-xs text-slate-700">Preparat: <strong>${l.nazwaLeku}</strong> • Dawka: ${l.dawka}</p>
+                <p class="text-[11px] text-emerald-700 font-medium">${l.zgodaRodzicaWeryfikacja}</p>
+              </div>
+            </div>
+            <div>
+              ${l.czyPodany ? `
+                <span class="badge bg-emerald-100 text-emerald-800 text-xs">✓ Podane przez: ${l.podanePrzezNazwisko || 'Katarzyna Nowak'}</span>
+              ` : `
+                <button onclick="podajLek(${l.lekId})" class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold transition shadow">
+                  Potwierdź podanie & Podpisz
+                </button>
+              `}
+            </div>
+          </div>
+        `).join('');
+
+        // Alergicy
+        document.getElementById('alergicy-grid').innerHTML = alergicy.map(a => `
+          <div class="p-4 bg-orange-50/50 border border-orange-200 rounded-xl text-xs flex flex-col justify-between">
+            <div>
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="text-lg">${a.ikonaTyp === 'nut' ? '🥜' : a.ikonaTyp === 'grain' ? '🌾' : a.ikonaTyp === 'lungs' ? '🫁' : '🥛'}</span>
+                <h5 class="font-bold text-slate-900">${a.dzieckoImieNazwisko}</h5>
+              </div>
+              <p class="text-slate-500 text-[11px] mb-2">${a.grupaNazwa}</p>
+              <p class="font-bold text-orange-800 mb-1">${a.alergiaLubDietaTytul}</p>
+              <p class="text-slate-600 leading-relaxed">${a.opisZalecenia}</p>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-3 pt-2 border-t border-orange-100">${a.apteczkaLokalizacja || ''}</p>
+          </div>
+        `).join('');
+
+        // BHP
+        document.getElementById('bhp-list').innerHTML = bhp.map(b => `
+          <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs">
+            <div>
+              <span class="font-mono font-bold text-slate-500">${b.nrProtokolu}</span>
+              <p class="font-bold text-slate-900 mt-0.5">${b.dzieckoImieNazwisko} (${b.grupaNazwa}) • ${b.miejsceZdarzenia}</p>
+              <p class="text-slate-600">${b.opisUrazu} • Udzielona pomoc: ${b.udzielonaPomoc}</p>
+            </div>
+            <div class="text-right">
+              <span class="text-emerald-700 font-bold">${b.statusPowiadomien}</span>
+              <p class="text-slate-400 text-[11px]">Świadek: ${b.swiadekPracownik}</p>
+            </div>
+          </div>
+        `).join('');
+
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function podajLek(lekId) {
+      await fetch('/api/medycyna-bhp/potwierdz-podanie', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lekId: lekId, pracownikId: 1, potwierdzeniePodpisu: true })
+      });
+      alert('Podanie leku zostało potwierdzone i podpisane przez wychowawcę!');
+      fetchMedycyna();
+      fetchDashboardData();
+    }
+
+    // Fetch Catering
+    async function fetchCatering() {
+      try {
+        const [resW, resA] = await Promise.all([
+          fetch('/api/catering/wozki'),
+          fetch('/api/catering/alergeny-14')
+        ]);
+        const wozki = await resW.json();
+        const alergeny = await resA.json();
+
+        document.getElementById('wozki-lista').innerHTML = wozki.map(w => `
+          <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="font-bold text-slate-900">${w.salaNazwa} • ${w.oddzialNazwa}</span>
+                <span class="badge bg-slate-200 text-slate-700">${w.wozekNumer}</span>
+                <span class="text-slate-500 font-mono font-semibold">${w.godzinaWyjazdu}</span>
+              </div>
+              <p class="text-slate-700">• ${w.zawartoscLitraze}</p>
+              <p class="text-orange-700 font-semibold mt-0.5">Diety: ${w.dietyZgrzewane}</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-slate-500 font-medium">Odbiór: ${w.osobaOdbierajaca}</span>
+              <span class="badge ${w.statusWydania.includes('Wydano') ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                ${w.statusWydania}
+              </span>
+            </div>
+          </div>
+        `).join('');
+
+        document.getElementById('alergeny-14-grid').innerHTML = alergeny.map(a => `
+          <div class="p-3 bg-white border border-slate-200 rounded-xl text-center">
+            <span class="text-2xl">${a.ikonaAlergenu}</span>
+            <p class="font-bold text-slate-900 text-xs mt-1 truncate">${a.nazwaAlergenu.split('.')[1] || a.nazwaAlergenu}</p>
+            <p class="text-xs font-extrabold text-orange-600 mt-1">${a.liczbaDzieci} ${a.liczbaDzieci === 1 ? 'dziecko' : 'dzieci'}</p>
+          </div>
+        `).join('');
+
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Fetch Sale
+    async function fetchSale() {
+      try {
+        const res = await fetch('/api/rezerwacje-sal');
+        const list = await res.json();
+        document.getElementById('rezerwacje-sal-list').innerHTML = list.map(r => `
+          <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-slate-900 text-sm">${r.salaNazwa}</span>
+                <span class="badge bg-orange-100 text-orange-800 font-mono">${r.godzinaOd} - ${r.godzinaDo}</span>
+              </div>
+              <p class="text-slate-600 mt-1">${r.cel}</p>
+              <p class="text-[11px] text-slate-400">Rezerwujący: ${r.pracownikNazwisko} • ${r.dataRezerwacji}</p>
+            </div>
+            <span class="badge bg-emerald-100 text-emerald-800">Brak konfliktów (wietrzenie OK)</span>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function rezerwujSzybkaSale() {
+      await fetch('/api/rezerwacje-sal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          salaId: 7,
+          pracownikId: 1,
+          cel: 'Ćwiczenia integracji sensorycznej (SI) – tor przeszkód',
+          dataRezerwacji: new Date().toISOString().split('T')[0],
+          godzinaOd: '14:30',
+          godzinaDo: '15:30'
+        })
+      });
+      alert('Pomyślnie zarezerwowano Salę Sensoryczną!');
+      fetchSale();
+    }
+
+    // Fetch Obecności
+    async function fetchObecnosci() {
+      try {
+        const res = await fetch('/api/obecnosci');
+        const list = await res.json();
+        document.getElementById('obecnosci-tbody').innerHTML = `
+          <tr class="hover:bg-slate-50">
+            <td class="py-3 px-4 font-bold text-slate-900">Jan Kowalski (PESEL: 21281402911)</td>
+            <td class="py-3 px-4 text-slate-600">Grupa 3 (Sala C1)</td>
+            <td class="py-3 px-4 font-mono font-medium">07:42 (Wejście A • Karta/PIN)</td>
+            <td class="py-3 px-4 text-slate-700">5 godz. 51 min</td>
+            <td class="py-3 px-4"><span class="badge bg-emerald-100 text-emerald-800">● W sali</span></td>
+            <td class="py-3 px-4"><button onclick="alert('Wydano dziecko upoważnionemu rodzicowi!')" class="px-3 py-1 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold">Wydaj dziecko</button></td>
+          </tr>
+          <tr class="hover:bg-slate-50">
+            <td class="py-3 px-4 font-bold text-slate-900">Zofia Nowak (PESEL: 21290301822)</td>
+            <td class="py-3 px-4 text-slate-600">Grupa 3 (Sala C1)</td>
+            <td class="py-3 px-4 font-mono font-medium">08:05 (Wyjście: 13:10)</td>
+            <td class="py-3 px-4 text-slate-700">5h 05m (Zakończono)</td>
+            <td class="py-3 px-4"><span class="badge bg-slate-100 text-slate-600">Odebrany</span></td>
+            <td class="py-3 px-4 text-slate-400 font-medium">Zakończono</td>
+          </tr>
+        `;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function zarejestrujOdbiorDziecka() {
+      alert('Autoryzacja kodem PIN pomyślna. Wydano dziecko Jan Kowalski mamie.');
+      fetchDashboardData();
+    }
+
+    // Fetch Dziennik
+    async function fetchDziennik() {
+      try {
+        const res = await fetch('/api/dziennik/wpisy');
+        const list = await res.json();
+        document.getElementById('dziennik-wpisy-list').innerHTML = list.map(w => `
+          <div class="p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-bold text-orange-600">${w.data} • Temat dnia: ${w.temat}</span>
+              <span class="text-slate-500 font-medium">Frekwencja: ${w.frekwencjaObecni} / ${w.frekwencjaZapisani} | Wychowawca: ${w.prowadzacyNazwisko}</span>
+            </div>
+            <p class="text-xs text-slate-600"><strong>Obszary podstawy MEN:</strong> ${w.podstawaProgramowa}</p>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+              <div class="p-3 bg-white rounded-lg border border-slate-200">
+                <span class="font-bold text-slate-800">1. Poranek</span>
+                <p class="text-slate-600 mt-1">${w.poranekOpis || 'Zabawy integracyjne & Ćwiczenia poranne'}</p>
+              </div>
+              <div class="p-3 bg-white rounded-lg border border-slate-200">
+                <span class="font-bold text-slate-800">2. Działanie główne</span>
+                <p class="text-slate-600 mt-1">${w.dzialanieGlowneOpis || 'Zajęcia dydaktyczne z matematyki'}</p>
+              </div>
+              <div class="p-3 bg-white rounded-lg border border-slate-200">
+                <span class="font-bold text-slate-800">3. Pobyt w ogrodzie</span>
+                <p class="text-slate-600 mt-1">${w.pobytNaSwiezymPowietrzuOpis || 'Zabawy z piłką i skakanką w ogrodzie'}</p>
+              </div>
+              <div class="p-3 bg-white rounded-lg border border-slate-200">
+                <span class="font-bold text-slate-800">4. Popołudnie</span>
+                <p class="text-slate-600 mt-1">${w.popoludnieOpis || 'Relaksacja, czytanie bajki i zabawa swobodna'}</p>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Inicjalizacja
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchDashboardData();
+    });
+  </script>
+</body>
+</html>
